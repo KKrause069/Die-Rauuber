@@ -1,0 +1,17 @@
+[build]
+  command = "bun run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# Map /api/tts (used by the frontend) to the Netlify Function
+[[redirects]]
+  from = "/api/tts"
+  to = "/.netlify/functions/tts"
+  status = 200
+  force = true
+
+# SPA fallback for client-side routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
