@@ -334,12 +334,16 @@ export const SLIDES: Slide[] = [
       "An dieser Stelle würde ich euch jetzt eine kurze Textstelle vorlesen. Drei Stellen eignen sich besonders gut: Erstens Karls große Rede gegen die Welt im ersten Akt, in der er sagt: „Das Gesetz hat noch keinen großen Mann gebildet, aber die Freiheit brütet Kolosse und Extremitäten aus.“ Zweitens Franz' zynisches Selbstgespräch ganz am Anfang, in dem er erklärt, warum er an kein Gewissen glaubt. Oder drittens Karls Schlussmonolog mit dem berühmten Satz „Dem Mann kann geholfen werden.“ — kurz, aber unglaublich stark.",
   },
   {
-    id: "outro",
-    section: "Schluss",
-    kicker: "Danke",
-    title: "Fragen?",
-    subtitle: "Vielen Dank für eure Aufmerksamkeit.",
+    id: "read",
+    section: "Textstelle",
+    kicker: "7 · Lesung",
+    title: "Hier lese ich eine Stelle vor",
+    subtitle: "Kurze Textstelle aus „Die Räuber“ — im Anschluss: Fragen & Diskussion.",
+    body: [
+      "Ich lese jetzt die ausgewählte Textstelle laut vor.",
+      "Danach: Vielen Dank für eure Aufmerksamkeit — gerne Fragen!",
+    ],
     speech:
-      "Damit bin ich am Ende meiner Präsentation. Vielen Dank für eure Aufmerksamkeit — ich freue mich auf eure Fragen.",
+      "An dieser Stelle lese ich euch jetzt die ausgewählte Textstelle vor. … Damit bin ich am Ende meiner Präsentation. Vielen Dank für eure Aufmerksamkeit — ich freue mich auf eure Fragen.",
   },
 ];
