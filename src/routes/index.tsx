@@ -1,29 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
+import Presentation from "@/components/Presentation";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Die Verwandlung — Franz Kafka · Buchpräsentation" },
+      {
+        name: "description",
+        content:
+          "Interaktive Buchpräsentation zu Franz Kafkas „Die Verwandlung“ mit Autor, Figuren, Handlung, Interpretation, Sprechertext und Auto-Vortrag.",
+      },
+      { property: "og:title", content: "Die Verwandlung — Buchpräsentation" },
+      {
+        property: "og:description",
+        content:
+          "Slides, Sprechertext und automatischer Vortrag für Kafkas „Die Verwandlung“.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: Index,
+  component: Presentation,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
