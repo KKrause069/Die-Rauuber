@@ -83,26 +83,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Die Räuber – Buchpräsentation" },
-      {
-        name: "description",
-        content:
-          "Interaktive Buchpräsentation zu Friedrich Schillers „Die Räuber“ mit Sprecher-Modus und vollbildtauglichen Folien.",
-      },
-      { property: "og:title", content: "Die Räuber – Buchpräsentation" },
-      {
-        property: "og:description",
-        content:
-          "Interaktive Buchpräsentation zu Friedrich Schillers „Die Räuber“ mit Sprecher-Modus und vollbildtauglichen Folien.",
-      },
+      { title: "Lovable App" },
+      { name: "description", content: "Book Presentation Pal assists with creating and delivering book presentations, covering author background, plot, characters, and analysis." },
+      { name: "author", content: "Lovable" },
+      { property: "og:title", content: "Lovable App" },
+      { property: "og:description", content: "Book Presentation Pal assists with creating and delivering book presentations, covering author background, plot, characters, and analysis." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Die Räuber – Buchpräsentation" },
-      {
-        name: "twitter:description",
-        content:
-          "Interaktive Buchpräsentation zu Friedrich Schillers „Die Räuber“ mit Sprecher-Modus und vollbildtauglichen Folien.",
-      },
+      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Lovable App" },
+      { name: "twitter:description", content: "Book Presentation Pal assists with creating and delivering book presentations, covering author background, plot, characters, and analysis." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0fe96a88-d6bd-47d5-9e4b-f0c34bb687de/id-preview-3a361739--06a2eef9-30e3-4d3e-a653-7efc1cd5876c.lovable.app-1780870636642.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0fe96a88-d6bd-47d5-9e4b-f0c34bb687de/id-preview-3a361739--06a2eef9-30e3-4d3e-a653-7efc1cd5876c.lovable.app-1780870636642.png" },
     ],
     links: [
       {
