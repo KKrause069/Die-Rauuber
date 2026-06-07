@@ -20,19 +20,16 @@ function useScale(ref: React.RefObject<HTMLDivElement | null>) {
 function SlideFrame({ slide, index, total }: { slide: Slide; index: number; total: number }) {
   return (
     <div className="slide-content bg-paper text-ink">
-      {/* Decorative borders */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-16 left-16 right-16 bottom-16 border border-[var(--gold)]/30" />
         <div className="absolute top-20 left-20 right-20 bottom-20 border border-[var(--gold)]/15" />
       </div>
 
-      {/* Header strip */}
       <div className="absolute top-24 left-32 right-32 flex items-center justify-between slide-chrome text-[color:var(--muted-foreground)]">
         <span className="tracking-[0.3em] uppercase">{PRESENTATION.bookTitle} · {PRESENTATION.bookAuthor}</span>
         <span>{String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span>
       </div>
 
-      {/* Body */}
       <div className="absolute inset-x-32 top-48 bottom-40 flex flex-col">
         {slide.kicker && (
           <div className="slide-kicker text-[color:var(--gold)] mb-10">{slide.kicker}</div>
@@ -71,7 +68,6 @@ function SlideFrame({ slide, index, total }: { slide: Slide; index: number; tota
         )}
       </div>
 
-      {/* Footer */}
       <div className="absolute bottom-24 left-32 right-32 flex items-center justify-between slide-chrome text-[color:var(--muted-foreground)]">
         <span className="italic">{slide.section}</span>
         <span>{PRESENTATION.bookYear}</span>
@@ -105,51 +101,82 @@ function ScaledSlide({ slide, index, total }: { slide: Slide; index: number; tot
   );
 }
 
-// --- TTS hook -------------------------------------------------------------
-function useTTS() {
-  const [speaking, setSpeaking] = useState(false);
-  const [voice, setVoice] = useState<SpeechSynthesisVoice | null>(null);
+// --- High-quality TTS via ElevenLabs --------------------------------------
+const VOICES: { id: string; label: string }[] = [
+  { id: "XrExE9yKIg1WjnnlVkGX", label: "Matilda (weiblich, warm)" },
+  { id: "JBFqnCBsd6RMkjVDRZzb", label: "George (männlich, ruhig)" },
+  { id: "cgSgspJ2msm6clMCkdW9", label: "Jessica (weiblich, klar)" },
+  { id: "onwK4e9ZLuTAKqWW03F9", label: "Daniel (männlich, sonor)" },
+  { id: "FGY2WhTYpPnrIDTdsKH5", label: "Laura (weiblich, jung)" },
+];
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    const pick = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const de =
-        voices.find((v) => v.lang.toLowerCase().startsWith("de") && /google|natural|premium/i.test(v.name)) ||
-        voices.find((v) => v.lang.toLowerCase().startsWith("de"));
-      if (de) setVoice(de);
-    };
-    pick();
-    window.speechSynthesis.onvoiceschanged = pick;
+function useElevenTTS() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const urlRef = useRef<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const [speaking, setSpeaking] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const stop = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    if (urlRef.current) {
+      URL.revokeObjectURL(urlRef.current);
+      urlRef.current = null;
+    }
+    setSpeaking(false);
+    setLoading(false);
   }, []);
 
   const speak = useCallback(
-    (text: string, onEnd?: () => void) => {
-      if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "de-DE";
-      if (voice) u.voice = voice;
-      u.rate = 0.95;
-      u.pitch = 1;
-      u.onend = () => {
+    async (text: string, voiceId: string, onEnd?: () => void) => {
+      stop();
+      const ac = new AbortController();
+      abortRef.current = ac;
+      setLoading(true);
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, voiceId }),
+          signal: ac.signal,
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const blob = await res.blob();
+        if (ac.signal.aborted) return;
+        const url = URL.createObjectURL(blob);
+        urlRef.current = url;
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.onended = () => {
+          setSpeaking(false);
+          onEnd?.();
+        };
+        audio.onerror = () => {
+          setSpeaking(false);
+        };
+        setLoading(false);
+        setSpeaking(true);
+        await audio.play();
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") {
+          console.error("TTS error", e);
+        }
+        setLoading(false);
         setSpeaking(false);
-        onEnd?.();
-      };
-      u.onerror = () => setSpeaking(false);
-      setSpeaking(true);
-      window.speechSynthesis.speak(u);
+      }
     },
-    [voice],
+    [stop],
   );
 
-  const stop = useCallback(() => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    setSpeaking(false);
-  }, []);
+  useEffect(() => () => stop(), [stop]);
 
-  return { speak, stop, speaking };
+  return { speak, stop, speaking, loading };
 }
 
 // --- Main app -------------------------------------------------------------
@@ -158,7 +185,9 @@ export default function Presentation() {
   const [showNotes, setShowNotes] = useState(true);
   const [autoMode, setAutoMode] = useState(false);
   const [printing, setPrinting] = useState(false);
-  const { speak, stop, speaking } = useTTS();
+  const [voiceId, setVoiceId] = useState(VOICES[0].id);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { speak, stop, speaking, loading } = useElevenTTS();
 
   const total = SLIDES.length;
   const slide = SLIDES[idx];
@@ -171,6 +200,20 @@ export default function Presentation() {
     [stop, total],
   );
 
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  }, []);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
@@ -180,7 +223,7 @@ export default function Presentation() {
         e.preventDefault();
         go(-1);
       } else if (e.key === "n") setShowNotes((v) => !v);
-      else if (e.key === "f") document.documentElement.requestFullscreen?.();
+      else if (e.key === "f") toggleFullscreen();
       else if (e.key === "Escape") {
         stop();
         setAutoMode(false);
@@ -188,13 +231,12 @@ export default function Presentation() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [go, stop]);
+  }, [go, stop, toggleFullscreen]);
 
   // Auto-mode: speak then advance
   useEffect(() => {
     if (!autoMode) return;
-    const text = slide.speech;
-    speak(text, () => {
+    speak(slide.speech, voiceId, () => {
       setTimeout(() => {
         setIdx((i) => {
           if (i + 1 >= total) {
@@ -207,7 +249,7 @@ export default function Presentation() {
     });
     return () => stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoMode, idx]);
+  }, [autoMode, idx, voiceId]);
 
   const handlePrint = () => {
     setPrinting(true);
@@ -227,8 +269,7 @@ export default function Presentation() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* PRINT VIEW */}
+    <div className={`min-h-screen flex flex-col bg-background ${isFullscreen ? "fs-mode" : ""}`}>
       {printing && (
         <div className="print-only">
           {SLIDES.map((s, i) => (
@@ -254,14 +295,26 @@ export default function Presentation() {
         </div>
       )}
 
-      {/* TOP BAR */}
-      <header className="no-print border-b border-border bg-card/70 backdrop-blur">
-        <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between gap-4">
+      <header className="no-print fs-hide border-b border-border bg-card/70 backdrop-blur">
+        <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <span className="font-serif italic text-xl">{PRESENTATION.bookTitle}</span>
             <span className="text-muted-foreground text-sm">· {PRESENTATION.bookAuthor}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-sm flex-wrap">
+            <select
+              value={voiceId}
+              onChange={(e) => {
+                stop();
+                setVoiceId(e.target.value);
+              }}
+              className="px-2 py-2 rounded-md border border-border bg-card text-sm"
+              title="Stimme wählen"
+            >
+              {VOICES.map((v) => (
+                <option key={v.id} value={v.id}>{v.label}</option>
+              ))}
+            </select>
             <button
               onClick={() => (autoMode ? (setAutoMode(false), stop()) : setAutoMode(true))}
               className={`px-4 py-2 rounded-md border transition ${
@@ -273,11 +326,11 @@ export default function Presentation() {
               {autoMode ? "■ Auto-Vortrag stoppen" : "▶ Auto-Vortrag starten"}
             </button>
             <button
-              onClick={() => (speaking ? stop() : speak(slide.speech))}
+              onClick={() => (speaking || loading ? stop() : speak(slide.speech, voiceId))}
               className="px-3 py-2 rounded-md border border-border hover:bg-muted"
               title="Nur aktuelle Folie vorlesen"
             >
-              {speaking ? "🔇" : "🔊"}
+              {loading ? "⏳" : speaking ? "🔇" : "🔊"}
             </button>
             <button
               onClick={() => setShowNotes((v) => !v)}
@@ -286,7 +339,7 @@ export default function Presentation() {
               {showNotes ? "Notizen ausblenden" : "Notizen einblenden"}
             </button>
             <button
-              onClick={() => document.documentElement.requestFullscreen?.()}
+              onClick={toggleFullscreen}
               className="px-3 py-2 rounded-md border border-border hover:bg-muted"
             >
               Vollbild
@@ -299,7 +352,6 @@ export default function Presentation() {
             </button>
           </div>
         </div>
-        {/* section markers */}
         <div className="max-w-[1600px] mx-auto px-6 pb-3 flex gap-1">
           {SLIDES.map((_, i) => (
             <button
@@ -317,14 +369,13 @@ export default function Presentation() {
         </div>
       </header>
 
-      {/* STAGE */}
-      <main className="no-print flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0">
-        <div className="flex-1 min-h-[400px] lg:min-h-0 rounded-lg overflow-hidden shadow-xl">
+      <main className="no-print flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 fs-stage">
+        <div className="flex-1 min-h-[400px] lg:min-h-0 rounded-lg overflow-hidden shadow-xl fs-slide">
           <ScaledSlide slide={slide} index={idx} total={total} />
         </div>
 
         {showNotes && (
-          <aside className="lg:w-[420px] flex flex-col bg-card border border-border rounded-lg p-5 overflow-y-auto max-h-[40vh] lg:max-h-none">
+          <aside className="lg:w-[420px] flex flex-col bg-card border border-border rounded-lg p-5 overflow-y-auto max-h-[40vh] lg:max-h-none fs-hide">
             <div className="text-xs uppercase tracking-[0.25em] text-[color:var(--gold)] mb-2">
               Sprechertext
             </div>
@@ -343,8 +394,7 @@ export default function Presentation() {
         )}
       </main>
 
-      {/* BOTTOM NAV */}
-      <footer className="no-print border-t border-border bg-card/70 backdrop-blur">
+      <footer className="no-print fs-hide border-t border-border bg-card/70 backdrop-blur">
         <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between gap-4">
           <button
             onClick={() => go(-1)}
@@ -366,7 +416,6 @@ export default function Presentation() {
             Weiter →
           </button>
         </div>
-        {/* section quick nav */}
         <div className="max-w-[1600px] mx-auto px-6 pb-3 flex flex-wrap gap-2 text-xs">
           {sectionProgress.map((s) => (
             <button
@@ -393,6 +442,10 @@ export default function Presentation() {
           .print-only { display: block; }
           .no-print { display: none !important; }
         }
+        .fs-mode .fs-hide { display: none !important; }
+        .fs-mode .fs-stage { padding: 0 !important; gap: 0 !important; height: 100vh; }
+        .fs-mode .fs-slide { border-radius: 0 !important; box-shadow: none !important; }
+        :fullscreen { background: #1a1410; }
       `}</style>
     </div>
   );
