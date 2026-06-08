@@ -315,24 +315,7 @@ export const SLIDES: Slide[] = [
   },
 
   // TEXTSTELLE
-  {
-    id: "quote",
-    section: "Textstelle",
-    kicker: "6 · Textstelle",
-    title: "Vorschläge zum Vorlesen",
-    body: [
-      "• Karls große Rede gegen die Welt (1. Akt, 2. Szene)",
-      "  „Das Gesetz hat noch keinen großen Mann gebildet, aber die Freiheit brütet Kolosse und Extremitäten aus.“",
-      "",
-      "• Franz' zynisches Selbstgespräch über Gewissen (1. Akt, 1. Szene)",
-      "",
-      "• Karls Schlussmonolog mit dem berühmten Satz:",
-      "  „O über mich Narren, der ich wähnte, die Welt durch Gräuel zu verschönern.“",
-      "  „Dem Mann kann geholfen werden.“",
-    ],
-    speech:
-      "An dieser Stelle würde ich euch jetzt eine kurze Textstelle vorlesen. Drei Stellen eignen sich besonders gut: Erstens Karls große Rede gegen die Welt im ersten Akt, in der er sagt: „Das Gesetz hat noch keinen großen Mann gebildet, aber die Freiheit brütet Kolosse und Extremitäten aus.“ Zweitens Franz' zynisches Selbstgespräch ganz am Anfang, in dem er erklärt, warum er an kein Gewissen glaubt. Oder drittens Karls Schlussmonolog mit dem berühmten Satz „Dem Mann kann geholfen werden.“ — kurz, aber unglaublich stark.",
-  },
+
   {
     id: "read",
     section: "Textstelle",
