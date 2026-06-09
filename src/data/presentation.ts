@@ -298,21 +298,6 @@ export const SLIDES: Slide[] = [
     speech:
       "Sehr aufschlussreich ist der Spiegel-Charakter der beiden Brüder. Karl lehnt sich aus dem Gefühl heraus auf — aus Idealismus, Freiheitsdrang und Empörung. Er wird trotzdem zum Mörder. Franz lehnt sich aus dem reinen Verstand heraus auf — aus Berechnung, Egoismus und Verachtung der Moral. Er endet im Wahnsinn. Beide Wege scheitern. Schiller zeigt: Weder das pure Gefühl noch die pure Vernunft können einen Menschen retten, wenn ihm das innere moralische Gesetz fehlt. Genau das ist die zentrale Botschaft: Freiheit braucht Verantwortung, sonst kippt sie in Verbrechen. „Die Räuber“ ist deshalb auch eine Warnung vor dem Genie ohne ethische Bindung.",
   },
-  {
-    id: "ana-3",
-    section: "Interpretation",
-    kicker: "5 · Interpretation",
-    title: "Warum lesen wir das heute noch?",
-    body: [
-      "Sprache: leidenschaftlich, drastisch, modern — kein verstaubtes Drama",
-      "Themen: Familie, Ungleichbehandlung, Rebellion, Radikalisierung",
-      "Fragen, die jedes Jahrzehnt neu aktuell werden: Wer darf Gewalt anwenden?",
-      "Vorbild für unzählige spätere Werke — von Hugo bis hin zu Filmen",
-      "Schiller war 21, als er das schrieb — und hat damit das deutsche Theater verändert",
-    ],
-    speech:
-      "Warum lesen wir „Die Räuber“ über 240 Jahre später immer noch? Erstens wegen der Sprache: Schiller schreibt leidenschaftlich, drastisch und oft erstaunlich modern — das ist kein verstaubtes Drama, da wird geflucht, geschrien und geliebt. Zweitens wegen der Themen: ungerechte Behandlung in der Familie, Rebellion, Radikalisierung, die Frage nach legitimer Gewalt — das sind Themen, die in jedem Jahrzehnt neu aktuell werden. Drittens war das Stück Vorbild für unzählige spätere Werke, von Victor Hugos Romanen bis hin zu modernen Filmen über Rebellen und Outlaws. Und schließlich: Schiller war 21, als er das schrieb. Mit einem einzigen Stück hat ein junger Mann das deutsche Theater verändert.",
-  },
 
   // TEXTSTELLE
 
